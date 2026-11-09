@@ -14,6 +14,23 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Auth::routes(['register' => false]);
+
+// Fallback para Hosting Compartido sin soporte de Symlinks (cuando falla php artisan storage:link).
+// Si el symlink public/storage existe, el servidor web sirve el archivo directo;
+// si no existe, esta ruta entrega el archivo desde storage/app/public con caché de navegador.
+Route::get('/storage/{path}', function (string $path) {
+    if (str_contains($path, '..')) {
+        abort(403);
+    }
+
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    abort_unless($disk->exists($path), 404);
+
+    return $disk->response($path, null, [
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('storage.serve');
+
 //Language Translation
 Route::get('index/{locale}', [App\Http\Controllers\HomeController::class, 'lang']);
 
