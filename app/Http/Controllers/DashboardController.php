@@ -36,7 +36,8 @@ class DashboardController extends Controller
 
         // ── 1. Hub de Comunicados Corporativos Inteligente ──
         $postsCacheKey = "dashboard.posts.v2.u{$user->id}.{$storeContext}";
-        $posts = Cache::tags(['dashboard', 'posts'])->remember($postsCacheKey, now()->addMinutes(3), function () use ($storeId) {
+        $cacheRepo = Cache::supportsTags() ? Cache::tags(['dashboard', 'posts']) : Cache::store();
+        $posts = $cacheRepo->remember($postsCacheKey, now()->addMinutes(3), function () use ($storeId) {
             $query = Post::published()
                 ->with(['author', 'store', 'reads', 'reactions', 'comments'])
                 ->orderByDesc('pinned')
