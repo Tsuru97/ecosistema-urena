@@ -1,0 +1,40 @@
+/vendor/
+/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Laravel specific
+bootstrap/compiled.php
+app/storage/
+public/storage
+public/hot
+public_html/storage
+public_html/hot
+storage/*.key
+
+# Environment & Secrets (NEVER commit real .env files)
+.env
+.env.backup
+.env.production*
+.env.local
+.env.testing
+!.env.example
+auth.json
+
+# Local SQLite databases for testing/development
+/database/*.sqlite
+/database/*.sqlite-journal
+/database/*.sqlite-shm
+/database/*.sqlite-wal
+
+# IDEs, Editor & Temporary files
+/.idea/
+/.vscode/
+/.fleet/
+/.well-known/
+/.vagrant
+Homestead.yaml
+Homestead.json
+.phpunit.result.cache
+get_css.ps1
+replace_sm.php

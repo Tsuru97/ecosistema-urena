@@ -1,0 +1,51 @@
+name: Deploy to Production (CD)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build & Deploy to Hosting
+    runs-on: ubuntu-latest
+    # Solo ejecuta el despliegue si el secreto SSH_HOST ya fue configurado en GitHub Settings -> Secrets
+    if: ${{ vars.ENABLE_CD == 'true' || secrets.SSH_HOST != '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, gd, curl, bcmath, zip
+          coverage: none
+
+      - name: Setup Node.js 20 & Build Frontend Assets
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Compile Production Assets (Vite)
+        run: |
+          npm ci
+          npm run build
+
+      - name: Sync compiled assets & Execute Remote Deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+            bash ./deploy.sh
