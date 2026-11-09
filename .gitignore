@@ -28,6 +28,7 @@ auth.json
 /database/*.sqlite-wal
 
 # IDEs, Editor & Temporary files
+/.htaccess
 /.idea/
 /.vscode/
 /.fleet/
